@@ -1,5 +1,5 @@
-#include <asf.h>
 
+#include <asf.h>
 #define F_CPU 8000000UL
 
 #define CYCLES_IN_DLYTICKS_FUNC        8
@@ -9,11 +9,12 @@
 
 
 volatile uint8_t pulse = 0;  
-int buff [40];
+int buff1 [30];
+int buff2 [50];
 
 float flowRate = 0.00;
 float kFactor = 98.00;                   // conversion factor from frequency to flow rate in LPM.
-
+ int ndigit ;
 
 void configure_extint_channel(void);
 void configure_extint_callbacks(void);
@@ -86,8 +87,6 @@ int main(void)
 	configure_extint_callbacks();
 	system_interrupt_enable_global();
 	
-	//uint8_t string[] = "Hello World!\r\n";
-	//usart_write_buffer_wait(&usart_instance, string, sizeof(string));
 
 	uint16_t temp;
 
@@ -97,13 +96,20 @@ int main(void)
 		DelayMs(1000);
 		system_interrupt_disable_global();
 		
-		/*flowRate = 33.83 * pulse/kFactor;*/
+		flowRate = 33.83 * pulse/kFactor;
 		
-		itoa(pulse, buff, 10);
-		usart_write_buffer_wait(&usart_instance, buff, sizeof(buff));
-		uint8_t string[] = "  pulse \r\n";
-		usart_write_buffer_wait(&usart_instance, string, sizeof(string));
-		/*printf(pulse);*/
+		itoa(pulse, buff1, 10);
+		
+		char *gcvtf(float flowRate, int ndigit, char *buff2);		
+		      gcvtf(flowRate,2,buff2);
+		
+		usart_write_buffer_wait(&usart_instance, buff1, sizeof(buff1));
+		uint8_t string1[] = "  pulse \t";
+		usart_write_buffer_wait(&usart_instance, string1, sizeof(string1));
+		
+		usart_write_buffer_wait(&usart_instance, buff2, sizeof(buff2));
+		uint8_t string2[] = "  Oz/min \r\n";
+		usart_write_buffer_wait(&usart_instance, string2, sizeof(string2));
 		
 		
 		if (usart_read_wait(&usart_instance, &temp) == STATUS_OK) {
