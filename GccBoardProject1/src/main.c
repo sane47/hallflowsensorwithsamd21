@@ -1,6 +1,6 @@
 #include <asf.h>
 
-#define F_CPU 48000000UL
+#define F_CPU 8000000UL
 
 #define CYCLES_IN_DLYTICKS_FUNC        8
 #define MS_TO_DLYTICKS(ms)          (U32)(F_CPU / 1000 * ms / CYCLES_IN_DLYTICKS_FUNC) // ((float)(F_CPU)) / 1000.0
@@ -9,7 +9,10 @@
 
 
 volatile uint8_t pulse = 0;  
-int buff [20];
+int buff [40];
+
+float flowRate = 0.00;
+float kFactor = 98.00;                   // conversion factor from frequency to flow rate in LPM.
 
 
 void configure_extint_channel(void);
@@ -24,7 +27,7 @@ void configure_extint_channel(void)
 	config_extint_chan.gpio_pin           = PIN_PA07A_EIC_EXTINT7;
 	config_extint_chan.gpio_pin_mux       = MUX_PA07A_EIC_EXTINT7;
 	config_extint_chan.gpio_pin_pull      = EXTINT_PULL_UP;
-	config_extint_chan.detection_criteria = EXTINT_DETECT_HIGH;
+	config_extint_chan.detection_criteria = EXTINT_DETECT_RISING;
 	extint_chan_set_config(7, &config_extint_chan);
 
 
@@ -91,12 +94,17 @@ int main(void)
 	while (true) {
 		pulse = 0;
 		system_interrupt_enable_global();
-		DelayMs(166);
+		DelayMs(1000);
 		system_interrupt_disable_global();
+		
+		/*flowRate = 33.83 * pulse/kFactor;*/
+		
 		itoa(pulse, buff, 10);
 		usart_write_buffer_wait(&usart_instance, buff, sizeof(buff));
-		uint8_t string[] = "  Pulses \r\n";
+		uint8_t string[] = "  pulse \r\n";
 		usart_write_buffer_wait(&usart_instance, string, sizeof(string));
+		/*printf(pulse);*/
+		
 		
 		if (usart_read_wait(&usart_instance, &temp) == STATUS_OK) {
 			while (usart_write_wait(&usart_instance, temp) != STATUS_OK) {
