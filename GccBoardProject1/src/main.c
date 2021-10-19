@@ -101,7 +101,7 @@ int main(void)
 		itoa(pulse, buff1, 10);
 		
 		char *gcvtf(float flowRate, int ndigit, char *buff2);		
-		      gcvtf((int) flowRate,2,buff2);
+		      gcvtf((int)(flowRate+0.75),2,buff2);
 			  
 		
 		usart_write_buffer_wait(&usart_instance, buff1, sizeof(buff1));
